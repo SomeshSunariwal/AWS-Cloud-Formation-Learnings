@@ -77,7 +77,7 @@ Resources:
 
 ## 3. Intrinsic Functions
 
-### 1. And Condition
+### 3.1. And Condition
 
 Fn::And
 
@@ -122,9 +122,13 @@ Resources:
       AtRestEncryptionEnabled: !If [CanEncrypt, "true", "false"]
 ```
 
+### 3.2. Or Condition
+
 Fn::Or
 
 `Short` !Or
+
+### 3.3. Not Condition
 
 Fn::Not
 
@@ -134,6 +138,8 @@ Fn::Not
 !Not [!Equals [!Ref VariableName, CompareWith]]
 ```
 
+### 3.4. If Condition
+
 Fn::If
 
 ```yaml
@@ -141,3 +147,15 @@ Fn::If
 ```
 
 If condition is true then get the value from reference variable other wise assign the value 'If_Condition_false'
+
+## 4. Stack Change Set
+
+Add, Modify and Delete Resources in the already created stack.
+
+1.  Select Stack which you want to modify.
+2.  Click on `Stack Action`.
+3.  Choose `Create change set for current stack`.
+4.  Choose `Replace Current Template` if New Resource is added or removed or Choose `Use current template` if resource is modified.
+5.  Click Next->Next->Next.
+6.  Then Name a Change set and then Review Page will be shown to verify the Resources.
+7.  Click `Execute` to deploy changes.
