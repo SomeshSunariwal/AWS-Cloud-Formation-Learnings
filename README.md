@@ -1,4 +1,4 @@
-# AWS-CloudFormation-Learnings
+# AWS-CloudFormation-Guide
 
 ## 1. Base Template
 
