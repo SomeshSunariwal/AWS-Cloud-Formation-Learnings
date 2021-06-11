@@ -159,3 +159,72 @@ Add, Modify and Delete Resources in the already created stack.
 5.  Click Next->Next->Next.
 6.  Then Name a Change set and then Review Page will be shown to verify the Resources.
 7.  Click `Execute` to deploy changes.
+
+## 5. Pseudo Parameter
+
+There are some pseudo parameters provided by AWS.
+
+1.  `AWS::AccountId` : will return the account ID in which stack is creating.
+2.  `AWS::NotificationARNs` : will return the notification ARN of the current stack if notification ARN is setup before creating stack.
+3.  `AWS::NoValue` : will Removes the corresponding resource property when specified as a return value in the Fn::If intrinsic function.
+4.  `AWS::Partition` : Returns the partition that the resource is in
+5.  `AWS::Region` : will return the Region Name in which stack is creating.
+6.  `AWS::StackId`: will return the stack current Stack ID
+7.  `AWS::StackName` : Will return the current stack name
+8.  `AWS::URLSuffix` : will return the URL suffix. Ex. amazonaws.com,
+
+one way of use it to get the values and assign it to logical name or variable name.
+
+```yaml
+Condition:
+  NeedEncryption: !If [!Equal [!Ref AccountId, "123123"], "yes", "AWS::NoValue"] # will return yes or remove that option property from the resource if they have.
+
+Output: #shows the output
+  AccountId:
+    Value: !Ref "AWS::AccountId"
+
+  NotificationARNs:
+    Value: !Select [0, !Ref "AWS::NotificationARNs"]
+
+  Partition:
+    Value: !Ref "AWS::Partition"
+
+  Region:
+    Value: !Ref "AWS::Region"
+
+  StackId:
+    Value: !Ref "AWS::StackId"
+
+  StackName:
+    Value: !Ref "AWS::StackName"
+```
+
+### 6. User Data (AWS EC2)
+
+This will run only when the instance is created Successfully. Its like running shell command after creating a EC2 instance.
+
+```yaml
+Resources:
+  InstanceName:
+    Type: AWS:EC2:Instance
+    Properties:
+      InstanceType: t2.micro
+      UserData:
+        Fn: Base64:
+          !Sub |
+          #!/bin/bash
+          apt-get update -y
+          apt-get install npm
+          apt-get install create-react-app
+```
+
+Can be check in EC2 section
+
+1. Click on newly launched EC2 instance.
+2. Click on `Action` and then `Instance setting` and then `Edit user data`
+
+Log of command execution can be seen using
+
+```bash
+cat /var/log/cloud-init-output.log
+```
