@@ -8,7 +8,7 @@ Starting of any template.
 AWSTemplateFormatVersion: "2010-09-09"
 Description: A sample template
 Resources:
-  MyEC2Instance: #Logical unique value to each resource
+  MyEC2Instance: #Logical unique Identifier to each resource
     Type: AWS::ElastiCache::ReplicationGroup # Type of resource, Example : Redis Cache
     Properties:
 ```
@@ -54,7 +54,7 @@ Parameter:
       - Test3
 
 Mapping:
-  NewMap: # logical name or act as a variable name
+  NewMap: # logical Unique Identifier or act as a variable name
     Test1:
       CacheNodeType: t2.micro
       NumCacheClusters: 1
@@ -199,7 +199,7 @@ Output: #shows the output
     Value: !Ref "AWS::StackName"
 ```
 
-### 6. User Data (AWS EC2)
+## 6. User Data (AWS EC2)
 
 This will run only when the instance is created Successfully. Its like running shell command after creating a EC2 instance.
 
@@ -228,3 +228,55 @@ Log of command execution can be seen using
 ```bash
 cat /var/log/cloud-init-output.log
 ```
+
+## 7. Output
+
+This can be seen in output section the stack.
+
+```yaml
+Output:
+  LogicalID: #
+    Value: !Ref "AWS::StackName" #Mandatory Parameter
+    Description: "Any Description you want to show"
+    Export:
+      Name: !Ref "AWS::StackName" # Should be unique through out the region
+```
+
+## 8. Some More Function
+
+### 8.1 !GetAttr
+
+```yaml
+Resources:
+  InstanceName:
+    Type: AWS:EC2:Instance
+    Properties:
+      InstanceType: t2.micro
+```
+
+way to get the value of instance type of Logical ID InstanceName
+
+```bash
+${InstanceName.InstanceType}
+```
+
+Same as
+
+```yaml
+!GetAttr InstanceName.InstanceType
+```
+
+### 8.2 !Sub
+
+```yaml
+UserData:
+  Fn: Base64:
+    !Sub |
+    #!/bin/bash
+    apt-get update -y
+    mkdir /home/ubuntu/${AWS::StackName}
+```
+
+it will create a folder named with the current stack name after successful launch.
+
+${AWS::StackName} will be substituted with AWS pseudo parameter values
