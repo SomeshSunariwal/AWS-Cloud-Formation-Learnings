@@ -244,7 +244,17 @@ Output:
 
 ## 8. Some More Function
 
-### 8.1 !GetAttr
+### 8.1 Fn::GetAttr or !GetAttr
+
+Only get the attribute value if resource return the attribute value. can be check return section of every resource. Ex. https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-properties-ec2-instance.html
+
+```yaml
+Fn::GetAttr [LogicalResourceName, attributeType]
+```
+
+```yaml
+!GetAttr LogicalResourceName.attributeType
+```
 
 ```yaml
 Resources:
@@ -280,3 +290,151 @@ UserData:
 it will create a folder named with the current stack name after successful launch.
 
 ${AWS::StackName} will be substituted with AWS pseudo parameter values
+
+With Custom Name
+
+```yaml
+UserData:
+  Fn: Base64:
+    !Sub
+      - |
+        #!/bin/bash
+        apt-get update -y
+        mkdir /home/ubuntu/${StackNewName}
+      - { StackNewName : !Join [ "-", [ !Ref "AWS::StackName" , !Ref "AWS::Region" ] ] }
+```
+
+### 8.3 Fn::Join or !Join
+
+join values like a concatenation
+
+```yaml
+!Join ["-", ["a", "b", "c"]]
+```
+
+`OR`
+
+```yaml
+!Join :
+  - "-" # delimiter
+  - - "a"
+    - "b"
+    - "c"
+```
+
+Result will be a-b-c
+
+### 8.4 Fn::Select or !Select
+
+Return single value from array or object.
+
+```yaml
+!Select [1, ["Test 1", "Test 2", "AWS::StackName", !Ref LogicalValue]]
+```
+
+it will return the index 1 value and Output will be "`b`".
+
+If index is out of Bound and Null then it will give you `Stack Error`.
+
+## 8.5 Fn::Split or !Split
+
+```yaml
+Fn::Split [delimiter, string]
+```
+
+`OR`
+
+```yaml
+!Split [delimiter, string]
+```
+
+Ex.
+
+```yaml
+!Select [0, !Split ["-", "a-b-c"]]
+```
+
+output will be "`a`"
+
+### 8.6 Fn::FindInMap or !FindInMap
+
+```yaml
+Fn::FindInMap [LogicalID, TopLevelKey, SecondLevelKey]
+```
+
+`OR`
+
+```yaml
+!FindInMap [LogicalID, TopLevelKey, SecondLevelKey]
+```
+
+Ex.
+
+```yaml
+Mapping:
+  MapName:
+    LogicalID1:
+      ValueName: 1
+      ValueID: 2
+    LogicalID2:
+      ValueName: 3
+      ValueID: 4
+
+!FindInMap [MapName, LogicalID1, ValueName]
+```
+
+will return "`1`"
+
+Best Example can be seen above in `Section 3`.
+
+### 8.7 Fn::GetAZs or !GetAZs
+
+Will return availability zone within region.
+
+Ex.
+
+```Yaml
+!GetAZs : "us-east-1"
+```
+
+will return : `["us-east-1a", "us-east-1b", "us-east-1c"]`.
+
+#### `Error Case`
+
+```yaml
+!Select [0, [!GetAZs !Ref "AWS::Region"]]
+```
+
+This will give Error because `we cannot use short form of intrinsic function conjugately`.
+
+Can be used as
+
+```yaml
+!Select
+- 1
+- !GetAZs
+  - !Ref "AWS::Region"
+```
+
+### 8.8 Fn::ImportValue
+
+Cross Stack Reference
+
+Ex. Stack 1 output
+
+```yaml
+Output:
+  StackNameExport: # Should be unique ins entire region
+    Value: !Ref "AWS::StackName"
+    Description: "Return Stack Name from this stack"
+    Export:
+      Name: !Ref "AWS::StackName"
+```
+
+Stack 2
+
+```yaml
+ClusterName : !ImportValue : StackNameExport
+```
+
+it will set the cluster name as stack name.
